@@ -1,1 +1,75 @@
+attendance = [ 
+    ("192311001", "2026-10-01", "P"), 
+    ("192311001", "2026-10-02", "A"), 
+    ("192311001", "2026-10-03", "A"), 
+    ("192311001", "2026-10-04", "A"), 
+    ("192311002", "2026-10-01", "P"), 
+    ("192311002", "2026-10-02", "P") 
+] 
+# Common Function 
+def read_attendance(data): 
+    return data 
+def compute_stats(records): 
+    stats = {} 
+    for reg, date, status in records: 
+        stats.setdefault(reg, []).append(status) 
+    return stats 
+def generate_report(stats): 
+    print("ATTENDANCE REPORT") 
+
+    for reg, values in sorted(stats.items()): 
+        total = len(values) 
+        present = values.count("P") 
+        percentage = (present / total) * 100 
+        print(reg, f"{percentage:.2f}%") 
+        count = 0 
+        for status in values: 
+            if status == "A": 
+                count += 1 
+            else: 
+                count = 0 
+            if count == 3: 
+                print(reg, "Absent for 3 consecutive days") 
+                break 
+# 1. Single Script 
+print("\n1. SINGLE SCRIPT") 
+records = read_attendance(attendance) 
+stats = compute_stats(records) 
+generate_report(stats) 
+# 2. One Module Imported by Main Script 
+print("\n2. ONE MODULE") 
+import types 
+attendance_module = types.SimpleNamespace( 
+    read_attendance=read_attendance, 
+    compute_stats=compute_stats, 
+    generate_report=generate_report 
+) 
+records = attendance_module.read_attendance(attendance) 
+stats = attendance_module.compute_stats(records) 
+attendance_module.generate_report(stats) 
+# 3. Three Modules in One Folder 
+print("\n3. THREE MODULES") 
+
+reader_module = types.SimpleNamespace( 
+    read_attendance=read_attendance 
+) 
+stats_module = types.SimpleNamespace( 
+    compute_stats=compute_stats 
+) 
+report_module = types.SimpleNamespace( 
+    generate_report=generate_report 
+) 
+records = reader_module.read_attendance(attendance) 
+stats = stats_module.compute_stats(records) 
+report_module.generate_report(stats) 
+# 4. Package with Three Submodules 
+print("\n4. PACKAGE") 
+package = types.SimpleNamespace( 
+    reader=reader_module, 
+    stats=stats_module, 
+    report=report_module 
+) 
+records = package.reader.read_attendance(attendance) 
+stats = package.stats.compute_stats(records) 
+package.report.generate_report(stats) 
 
