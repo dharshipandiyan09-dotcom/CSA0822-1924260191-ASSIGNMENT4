@@ -1,1 +1,43 @@
+from decimal import Decimal, InvalidOperation 
+def process_file(filename): 
+    total = Decimal("0.00") 
+    report = [] 
+    rejected = [] 
+
+    try: 
+        with open(filename, "r", encoding="utf-8") as file: 
+            for line_no, line in enumerate(file, 1): 
+                if not line.strip(): 
+                    continue 
+                try: 
+                    parts = line.strip().split(",") 
+                    if len(parts) != 3: 
+                        raise ValueError("Invalid fields") 
+                    register, name, amount = parts 
+                    bill = Decimal(amount) 
+                    if not bill.is_finite() or bill < 0: 
+                        raise ValueError("Invalid amount") 
+                    total += bill 
+                    report.append( 
+                        f"{register} - {name} - {bill:.2f}" 
+                    ) 
+                except (ValueError, InvalidOperation) as e: 
+                    rejected.append((line_no, line.strip(), str(e))) 
+    except FileNotFoundError: 
+        print("Input file not found.") 
+        return 
+    print("MESS BILL REPORT") 
+    for item in report: 
+        print(item) 
+    print("Total Amount:", total) 
+    print("Rejected Records:") 
+    for item in rejected: 
+        print(item) 
+# Sample input file 
+with open("mess_oct.txt", "w", encoding="utf-8") as f: 
+    f.write("101,Ravi,1250.50\n") 
+    f.write("102,Anu,1100.00\n") 
+    f.write("103,Kumar,abc\n") 
+    f.write("104,Divya,900.00\n") 
+process_file("mess_oct.txt") 
 
